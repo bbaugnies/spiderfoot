@@ -50,6 +50,7 @@ class sfp_xforce(SpiderFootPlugin):
     results = dict()
 
     def xforce_gettoken(self, xforce_url):
+	TOKEN = self.opts['xforcetoken']
         HOME = os.path.dirname(os.path.realpath(__file__))
         tokenf = open(HOME + "/" + TOKEN ,"r")
         token = tokenf.readline()
