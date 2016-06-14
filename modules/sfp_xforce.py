@@ -51,17 +51,10 @@ class sfp_xforce(SpiderFootPlugin):
 
     def xforce_gettoken(self, xforce_url):
         HOME = os.path.dirname(os.path.realpath(__file__))
-        TOKEN = self.opts['xforcetoken']
-
-        if os.path.isfile("./" + TOKEN):
-            tokenf = open(HOME + "/" + TOKEN ,"r")
-            token = tokenf.readline()
-        else:
-            data = urllib2.urlopen( xforce_url + "/auth/anonymousToken" )
-            t = json.load(data)
-            token = str(t['token'])
-            tokenf = open(HOME + "/token","w")
-            tokenf.write(token)
+        tokenf = open(HOME + "/" + TOKEN ,"r")
+        token = tokenf.readline()
+	# anonymous tokens are now deprecated
+	# handling of invalid tokens is now done in "handleEvent"
         return token
 
     def setup(self, sfc, userOpts=dict()):
@@ -97,7 +90,7 @@ class sfp_xforce(SpiderFootPlugin):
 
         xforce_url = "https://xforce-api.mybluemix.net:443"
         token = self.xforce_gettoken(xforce_url)
-        htoken = "Bearer "+ token
+	htoken = "Bearer "+ token
         headers = {'Authorization': htoken,}
         url = xforce_url + "/" + querytype + "/" + qry
         res = self.sf.fetchUrl(url , timeout=self.opts['_fetchtimeout'], useragent="SpiderFoot", headers=headers)
@@ -120,6 +113,11 @@ class sfp_xforce(SpiderFootPlugin):
         eventName = event.eventType
         srcModuleName = event.module
         eventData = event.data
+
+	TOKEN = self.opts['xforcetoken']
+	if not os.path.isfile("./" + TOKEN):
+            self.sf.error("You enabled sfp_xforce but did not specify a valid token!", False)
+            return None
 
         infield_sep = self.opts['infield_sep']
 

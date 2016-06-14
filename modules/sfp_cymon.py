@@ -82,7 +82,12 @@ class sfp_cymon(SpiderFootPlugin):
 
         if res['content'] is None:
             self.sf.info("No Cymon info found for " + qry)
-            return None
+            # normally returns None, but that result is not handled in the rest of the code
+	    # other modules use "continue" if the query returns None, moving on to the next addr
+	    # but here, we can still perform other queries on the same one
+	    
+	    # returning an empty dict allows execution to continue without results
+	    return {}
 
         try:
             info = json.loads(res['content'])
